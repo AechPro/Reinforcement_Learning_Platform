@@ -19,13 +19,13 @@ class Agent(object):
         policy_input = policy_input = np.reshape(obs_buffer, buffer_shape)
 
         while not env.needs_reset:
-            action = self.get_action(policy_input, obs_stats=obs_stats)
+            action = self.get_action(policy, policy_input, obs_stats=obs_stats)
             obs, reward = env.step(action)
 
             _attach_obs_to_buffer(obs, obs_buffer, buffer_shape[0])
 
             next_policy_input = np.reshape(obs_buffer, buffer_shape)
-            episode_data.register((policy_input.copy(), (action,), next_policy_input.copy(), reward, env.needs_reset))
+            episode_data.register_data((policy_input.copy(), (action,), next_policy_input.copy(), reward, env.needs_reset))
             policy_input = next_policy_input
 
             episode_data.timesteps+=1
@@ -47,7 +47,7 @@ class Agent(object):
         policy_input = policy_input = np.reshape(obs_buffer, buffer_shape)
 
         while not env.needs_reset:
-            action = self.get_action(policy_input, obs_stats=obs_stats)
+            action = self.get_action(policy, policy_input, obs_stats=obs_stats)
             obs, reward = env.step(action)
 
             _attach_obs_to_buffer(obs, obs_buffer, buffer_shape[0])
@@ -66,7 +66,7 @@ class Agent(object):
         del obs_buffer
         return benchmark_reward
 
-    def get_action(self, state, obs_stats=None):
+    def get_action(self, policy, state, obs_stats=None):
         raise NotImplementedError
 
 def _attach_obs_to_buffer(obs, obs_buffer, max_buffer_len):
