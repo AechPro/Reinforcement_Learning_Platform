@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../Finite_Difference_Optimization/.idea/Finite_Difference_Optimization.iml" filepath="$PROJECT_DIR$/../Finite_Difference_Optimization/.idea/Finite_Difference_Optimization.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/Reinforcement_Learning_Platform.iml" filepath="$PROJECT_DIR$/.idea/Reinforcement_Learning_Platform.iml" />
     </modules>
   </component>

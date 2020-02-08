@@ -2,7 +2,7 @@ import numpy as np
 
 from Environments import GymEnvironment
 from Policies import PolicyActionParsers
-from Policies.PyTorch import FeedForward
+from Policies import FeedForward
 
 
 def test_build():
