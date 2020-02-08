@@ -1,5 +1,6 @@
 import numpy as np
-import torch
+import time
+from Agents import EpisodeData
 
 class Agent(object):
     def __init__(self, config):
@@ -8,91 +9,68 @@ class Agent(object):
 
     def run_training_episode(self, policy, env, obs_stats = None):
         initial_obs = env.reset()
-        done = False
-        state = env.get_random_state()
-        episode_results = []
-
-        reward = 0
-        timesteps = 1
+        episode_data = EpisodeData()
 
         buffer_shape = [self.cfg["policy"]["observation_buffer_length"]]
         for entry in policy.input_shape:
             buffer_shape.append(entry)
 
         obs_buffer = [initial_obs.copy() for _ in range(buffer_shape[0])]
+        policy_input = policy_input = np.reshape(obs_buffer, buffer_shape)
 
         while not env.needs_reset:
-            policy_input = np.reshape(obs_buffer, buffer_shape)
+            action = self.get_action(policy_input, obs_stats=obs_stats)
+            obs, reward = env.step(action)
 
-            action = self.get_action(policy_input)
-            obs, rew = env.step(action)
+            _attach_obs_to_buffer(obs, obs_buffer, buffer_shape[0])
 
-            reward += rew + self.cfg["rng"].choice(self.cfg["policy_optimizer"]["reward_jiggle"])
+            next_policy_input = np.reshape(obs_buffer, buffer_shape)
+            episode_data.register((policy_input.copy(), (action,), next_policy_input.copy(), reward, env.needs_reset))
+            policy_input = next_policy_input
 
-            #attach_obs_to_buffer(obs_buffer, obs, buffer_shape[0])
-
-            obs_buffer.append(obs)
-            if len(obs_buffer) >= buffer_shape[0]:
-                old = obs_buffer.pop(0)
-                del old
-
-            timesteps += 1
+            episode_data.timesteps+=1
 
         env.close()
         del obs_buffer
-        return reward, timesteps
+        return episode_data
 
-        while not done:
+    def run_benchmark_episode(self, policy, env, obs_stats = None, render = False, render_frame_delay = None):
+        initial_obs = env.reset()
 
+        benchmark_reward = 0
 
-            # epsilon greedy
-            epsilon = self.eps_end + (self.eps_start - self.eps_end) * np.exp(-1. * self.iteration / self.eps_decay)
-            if np.random.uniform(0, 1) < epsilon:
-                best_action = env.get_random_action()
-            else:
-                with torch.no_grad():
-                    best_action = 0
-                    best_score = -np.inf
-                    for action in num_actions:
-                        input_state = np.concatenate((state, (action,)))
-                        input_batch = np.reshape(input_state, (1, len(input_state)))
-                        policy_output = policy.get_action(input_batch)
-                        action_quality = policy_output.max().item()
+        buffer_shape = [self.cfg["policy"]["observation_buffer_length"]]
+        for entry in policy.input_shape:
+            buffer_shape.append(entry)
 
-                        if action_quality > best_score:
-                            best_action = action
-                            best_score = action_quality
+        obs_buffer = [initial_obs.copy() for _ in range(buffer_shape[0])]
+        policy_input = policy_input = np.reshape(obs_buffer, buffer_shape)
 
-            next_state, reward, done, _ = env.step(best_action)
-            episode_results.append((state, (best_action,), next_state, reward, done))
-            state = next_state
+        while not env.needs_reset:
+            action = self.get_action(policy_input, obs_stats=obs_stats)
+            obs, reward = env.step(action)
 
-        return episode_results
+            _attach_obs_to_buffer(obs, obs_buffer, buffer_shape[0])
+            policy_input = np.reshape(obs_buffer, buffer_shape)
 
-    def run_benchmark_episode(self, policy, env):
-        env.reset()
-        done = False
-        state = env.get_random_state()
-        total_reward = 0
-        num_actions = range(np.prod(env.output_space))
+            benchmark_reward += reward
 
-        while not done:
-            with torch.no_grad():
-                best_action = 0
-                best_score = -np.inf
-                for action in num_actions:
-                    input_state = np.concatenate((state, (action,)))
-                    input_batch = np.reshape(input_state, (1, len(input_state)))
-                    policy_output = policy.get_action(input_batch)
-                    action_quality = policy_output.max().item()
+            if render:
+                env.render()
+                if render_frame_delay is not None:
+                    assert type(render_frame_delay) in (int, float), "ATTEMPTED TO RENDER A BENCHMARK EPISODE WITH INVALID" \
+                                                                     "FRAME DELAY PERIOD {}".format(render_frame_delay)
+                    time.sleep(render_frame_delay)
 
-                    if action_quality > best_score:
-                        best_action = action
-                        best_score = action_quality
+        env.close()
+        del obs_buffer
+        return benchmark_reward
 
-            state, reward, done, _ = env.step(best_action)
-            total_reward += reward
-            env.env.render()
-        #env.env.close()
+    def get_action(self, state, obs_stats=None):
+        raise NotImplementedError
 
-        return total_reward
+def _attach_obs_to_buffer(obs, obs_buffer, max_buffer_len):
+    obs_buffer.append(obs)
+    if len(obs_buffer) >= max_buffer_len:
+        old = obs_buffer.pop(0)
+        del old
