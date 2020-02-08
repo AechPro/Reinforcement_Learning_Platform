@@ -31,18 +31,20 @@ class Optimizer(object):
     def step(self):
         batch_size = 32
         self.policy.model.train()
-
-        for i in range(batch_size):
+        with torch.no_grad():
             rewards = []
             observations = []
             actions = []
-            with torch.no_grad():
+
+            for i in range(batch_size):
                 episode_data = self.agent.run_training_episode(self.policy, self.env)
                 episode_data.compute_future_rewards(0.99)
 
-            actions += episode_data.actions
-            rewards += episode_data.future_rewards
-            observations += episode_data.observations
+                episode_reward = sum(episode_data.rewards)
+                for j in range(len(episode_data.rewards)):
+                    actions.append(episode_data.actions[j])
+                    rewards.append(episode_reward)
+                    observations.append(episode_data.observations[j])
 
         obs = torch.as_tensor(observations, dtype=torch.float32)
         acts = torch.as_tensor(actions, dtype=torch.int32)
@@ -55,7 +57,13 @@ class Optimizer(object):
         loss.backward()
         self.optimizer.step()
 
-        print(loss.item())
+
+        policy_reward = 0
+        for i in range(10):
+            policy_reward += self.agent.run_benchmark_episode(self.policy, self.env)
+        policy_reward/=10
+
+        print(loss.item()," | ", policy_reward)
 
     def is_done(self):
         return False
