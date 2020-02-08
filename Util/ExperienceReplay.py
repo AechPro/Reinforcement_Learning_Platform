@@ -10,7 +10,7 @@ class ExperienceReplay(object):
         self.size = size
         self.memory = []
 
-    def register_data(self, episode_data):
+    def register_trajectory(self, episode_data):
         episode_data.compute_future_rewards()
         for i in range(len(episode_data.rewards)):
             timestep = (
@@ -21,19 +21,28 @@ class ExperienceReplay(object):
                 episode_data.future_rewards[i],
                 episode_data.next_observations[i]
             )
-            self.add_timestep(timestep)
+            self.register_timestep(timestep)
 
-    def get_random(self, rng):
-        idx = rng.randint(0, len(self.memory))
-        return self.memory[idx]
-
-    def get_random_batch(self, rng, batch_size):
-        batch = [self.get_random(rng) for _ in range(batch_size)]
-        return batch
-
-    def add_timestep(self, timestep):
+    def register_timestep(self, timestep):
         self.memory.append(timestep)
 
         if len(self.memory) > self.size:
             _ = self.memory.pop(0)
             del _
+
+    def get(self, idx):
+        if len(self.memory) > idx >= 0:
+            return self.memory[idx]
+        return None
+
+    def get_random(self, rng):
+        idx = rng.randint(0, len(self.memory)-1)
+        return self.get(idx)
+
+    def get_random_batch(self, rng, batch_size):
+        batch = [self.get_random(rng) for _ in range(batch_size)]
+        return batch
+
+    def cleanup(self):
+        del self.memory
+        self.memory = []

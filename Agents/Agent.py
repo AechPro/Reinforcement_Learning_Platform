@@ -27,8 +27,6 @@ class Agent(object):
 
             episode_data.register_data((current_obs, action, obs.copy(), reward, env.needs_reset))
 
-
-
             episode_data.timesteps+=1
 
         env.close()
