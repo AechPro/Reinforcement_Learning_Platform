@@ -1,5 +1,5 @@
 import torch.nn as nn
-
+import torch
 
 def parse_function(function_name):
     if function_name is None:
@@ -17,6 +17,9 @@ def parse_function(function_name):
 
     elif f == 'softmax' or f == 'soft max':
         function = nn.Softmax
+
+    elif f == 'id' or f == 'identity':
+        function = nn.Identity
 
     elif f == 'sigmoid' or f == 'logit' or f == 'logits':
         function = nn.Sigmoid
