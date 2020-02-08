@@ -29,14 +29,14 @@ class Optimizer(object):
         self.configure()
 
     def step(self):
-        batch_size = 32
+        batch_size = 5000
         self.policy.model.train()
         with torch.no_grad():
             rewards = []
             observations = []
             actions = []
 
-            for i in range(batch_size):
+            while len(rewards) < batch_size:
                 episode_data = self.agent.run_training_episode(self.policy, self.env)
                 episode_data.compute_future_rewards(0.99)
 

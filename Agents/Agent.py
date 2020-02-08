@@ -8,25 +8,26 @@ class Agent(object):
         self.cfg = config
 
     def run_training_episode(self, policy, env, obs_stats = None):
-        initial_obs = env.reset()
+        obs = env.reset()
         episode_data = EpisodeData()
 
         buffer_shape = [self.cfg["policy"]["observation_buffer_length"]]
         for entry in policy.input_shape:
             buffer_shape.append(entry)
 
-        obs_buffer = [initial_obs.copy() for _ in range(buffer_shape[0])]
-        policy_input = policy_input = np.reshape(obs_buffer, buffer_shape)
+        obs_buffer = [obs.copy() for _ in range(buffer_shape[0])]
 
         while not env.needs_reset:
+            current_obs = obs.copy()
+            policy_input = np.reshape(obs_buffer, buffer_shape)
             action = self.get_action(policy, policy_input, obs_stats=obs_stats)
             obs, reward = env.step(action)
 
             _attach_obs_to_buffer(obs, obs_buffer, buffer_shape[0])
 
-            next_policy_input = np.reshape(obs_buffer, buffer_shape)
-            episode_data.register_data((policy_input.copy(), (action,), next_policy_input.copy(), reward, env.needs_reset))
-            policy_input = next_policy_input
+            episode_data.register_data((current_obs, action, obs.copy(), reward, env.needs_reset))
+
+
 
             episode_data.timesteps+=1
 
