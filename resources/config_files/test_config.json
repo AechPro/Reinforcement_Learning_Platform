@@ -1,0 +1,72 @@
+{
+  "seed" : 10101010,
+  "noise_table_size" : 50000000,
+  "env_id" : "bsuite cartpole/2",
+
+  "server":
+  {
+    "address" : "localhost",
+    "port" : 1025
+  },
+
+  "policy":
+  {
+    "type" : ["torch", "ffnn"],
+    "init_std" : 0.05,
+    "action_noise_std" : 0.00,
+    "action_parser" : "sampling",
+    "observation_buffer_length" : 1,
+    "layers" : [64,64],
+    "layer_functions" : ["relu", "relu"],
+    "layer_extras" : ["bn", "bn"],
+    "output_function" : "softmax",
+    "output_extras" : "bn",
+    "normalize_observations" : false
+  },
+
+  "agent":
+  {
+    "type" : "torch fd"
+  },
+
+  "gradient_optimizer":
+  {
+    "type" : "adam",
+    "step_size": 0.05,
+    "beta1": 0.9,
+    "beta2": 0.999,
+    "epsilon": 1e-8
+  },
+
+  "policy_optimizer":
+  {
+    "type" : "es",
+    "noise_std" : 0.05,
+    "obs_stats_update_prob" : 0.01,
+    "reward_jiggle" : [-1e-4, 1e-4],
+    "returns_per_update" : 300,
+    "cost_function" : "fitness",
+    "antithetic_sampling" : true,
+    "vbn_buffer_size" : 1000,
+    "reward_normalization_function" : "centered ranks"
+  },
+
+  "delayed_returns" :
+  {
+    "max_policy_history_length" : 10,
+    "current_returns_ratio_for_theta_reward" : 0.2,
+    "minimum_allowed_returns_ratio" : 0.0
+  },
+
+  "novelty":
+  {
+    "num_strategy_frames" : 200,
+    "strategy_history_size" : 200,
+    "adaptive_omega_default" : 0.0,
+    "adaptive_omega_max" : 1.0,
+    "adaptive_omega_min" : 0.0,
+    "adaptive_omega_mean_threshold" : 1.01,
+    "reward_history_size" : 10,
+    "phi" : 0.8
+  }
+}

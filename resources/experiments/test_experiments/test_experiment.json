@@ -1,0 +1,21 @@
+{
+  "experiment_name" : "test_experiment",
+  "config_file" : "test_config.json",
+  "num_trials_per_adjustment" : 5,
+
+  "config_adjustments" :
+  {
+    "adjustment_1":
+    {
+      "key_set": ["gradient_optimizer", "min_dynamic_update_size"],
+      "range": {"begin": 0.5, "end": 2.0, "increment": 0.5},
+      "full_reset_per_increment" : false
+    }
+  },
+  "terminal_conditions":
+  {
+    "max_epoch" : -1,
+    "max_timesteps" : 3000000,
+    "policy_reward" : -1
+  }
+}
