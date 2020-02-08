@@ -1,11 +1,12 @@
 from Algorithms import OptimizerFactory
 
 class OptimizationManager(object):
-    def __init__(self, config):
-        self.cfg = config
+    def __init__(self):
+        self.cfg = None
         self.optimizer = None
 
-    def configure(self):
+    def configure(self, config):
+        self.cfg = config
         self.optimizer = OptimizerFactory.get_from_config(self.cfg)
         self.optimizer.configure()
 
@@ -22,6 +23,12 @@ class OptimizationManager(object):
 
     def set_base_dir(self, base_dir):
         pass
+
+    def set_terminal_conditions(self, conditions):
+        pass
+
+    def reset(self):
+        self.cleanup()
 
     def cleanup(self):
         if self.optimizer is not None:

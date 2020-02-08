@@ -1,5 +1,5 @@
 from Experiments import Experiment, ExperimentLoader
-from PolicyOptimizers import OptimizationManager
+from Algorithms import OptimizationManager
 import os
 
 class ExperimentManager(object):

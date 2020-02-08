@@ -33,7 +33,7 @@ class GymEnvironment(Environment):
         del self.current_observation
         self.current_observation = None
         self.needs_reset = False
-        self._env.reset()
+        return self._env.reset()
 
     def get_random_obs(self):
         obs, _ = self.step(self.get_random_action())

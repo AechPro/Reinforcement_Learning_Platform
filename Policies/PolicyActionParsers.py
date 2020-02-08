@@ -11,6 +11,5 @@ def random_sample(policy_output, rng=None):
 
     return rng.choice(a=actions, p=policy_output)
 
-
 def argmax_sample(policy_output, rng=None):
     return np.argmax(policy_output)

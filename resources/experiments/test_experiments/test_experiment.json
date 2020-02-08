@@ -7,8 +7,8 @@
   {
     "adjustment_1":
     {
-      "key_set": ["gradient_optimizer", "min_dynamic_update_size"],
-      "range": {"begin": 0.5, "end": 2.0, "increment": 0.5},
+      "key_set": ["policy_optimizer", "returns_per_update"],
+      "range": {"begin": 100, "end": 300, "increment": 100},
       "full_reset_per_increment" : false
     }
   },

@@ -2,7 +2,7 @@ import numpy as np
 import torch.nn
 
 from Policies.PyTorch import TorchPolicy
-from Utils import TorchJSONParser
+from Util import TorchJSONParser
 
 
 class FeedForward(TorchPolicy):

@@ -37,10 +37,13 @@ class BSuiteWrapper(object):
         return obs, reward, done, debug
 
     def seed(self, seed):
+
         self.env._rng.seed(seed)
 
     def reset(self):
-        self.env.reset()
+        timestep = self.env.reset()
+        obs = timestep.observation.reshape(self.observation_space.shape)
+        return obs
 
     def close(self):
         self.env.close()

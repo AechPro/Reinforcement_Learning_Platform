@@ -1,6 +1,6 @@
 from Agents import AgentFactory
 from Environments import EnvironmentFactory
-from Policies import PolicyFactory
+from Policies import PolicyFactory, PolicyActionParsers
 
 import torch
 from torch.distributions import Categorical
@@ -16,7 +16,12 @@ class Optimizer(object):
     def configure(self):
         self.agent = AgentFactory.get_from_config(self.cfg)
         self.env = EnvironmentFactory.get_from_config(self.cfg)
-        self.policy = PolicyFactory.get_from_config(self.cfg)
+
+        policy = PolicyFactory.get_from_config(self.cfg)
+        action_parser = PolicyActionParsers.linear_parse
+        self.policy = policy(self.env.observation_shape, self.env.action_shape, action_parser, self.cfg)
+        self.policy.build_model(self.cfg["policy"])
+
         self.optimizer = torch.optim.Adam(self.policy.model.parameters(), lr=1e-2)
 
     def reconfigure(self):
@@ -24,20 +29,33 @@ class Optimizer(object):
         self.configure()
 
     def step(self):
-        episode_data = self.agent.run_training_episode(self.policy, self.env)
+        batch_size = 32
+        self.policy.model.train()
 
-        obs = torch.as_tensor(episode_data.observations, dtype=torch.float32)
-        acts = torch.as_tensor(episode_data.actions, dtype=torch.int32)
-        rewards = torch.as_tensor(episode_data.rewards, dtype=torch.float32)
+        for i in range(batch_size):
+            rewards = []
+            observations = []
+            actions = []
+            with torch.no_grad():
+                episode_data = self.agent.run_training_episode(self.policy, self.env)
+                episode_data.compute_future_rewards(0.99)
+
+            actions += episode_data.actions
+            rewards += episode_data.future_rewards
+            observations += episode_data.observations
+
+        obs = torch.as_tensor(observations, dtype=torch.float32)
+        acts = torch.as_tensor(actions, dtype=torch.int32)
+        rewards = torch.as_tensor(rewards, dtype=torch.float32)
 
         self.optimizer.zero_grad()
-        output = self.policy.activate(obs)
-        log_probs = Categorical(output).log_prob(acts)
-        loss = -(log_probs * rewards)
+        output = self.policy.model(obs)
+        log_probs = Categorical(logits=output).log_prob(acts)
+        loss = -(log_probs * rewards).mean()
         loss.backward()
         self.optimizer.step()
 
-        print(loss)
+        print(loss.item())
 
     def is_done(self):
         return False
