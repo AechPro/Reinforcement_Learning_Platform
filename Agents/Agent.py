@@ -69,6 +69,9 @@ class Agent(object):
     def get_action(self, policy, state, obs_stats=None):
         raise NotImplementedError
 
+    def cleanup(self):
+        raise NotImplementedError
+
 def _attach_obs_to_buffer(obs, obs_buffer, max_buffer_len):
     obs_buffer.append(obs)
     if len(obs_buffer) >= max_buffer_len:
