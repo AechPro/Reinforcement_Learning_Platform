@@ -13,7 +13,7 @@ class Agent(object):
         episode_results = []
 
         reward = 0
-        timesteps = 0
+        timesteps = 1
 
         buffer_shape = [self.cfg["policy"]["observation_buffer_length"]]
         for entry in policy.input_shape:
