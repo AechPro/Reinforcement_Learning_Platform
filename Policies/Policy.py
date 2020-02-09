@@ -95,6 +95,5 @@ class Policy(object):
         shape = [batch_size]
         for entry in input_shape:
             shape.append(entry)
-        print(shape, target_input, self.input_shape)
 
         return np.reshape(target_input, shape)

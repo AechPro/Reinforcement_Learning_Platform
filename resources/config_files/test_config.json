@@ -14,12 +14,12 @@
     "type" : ["torch", "ffnn"],
     "init_std" : 0.05,
     "action_noise_std" : 0.00,
-    "action_parser" : "sampling",
+    "action_parser" : "linear",
     "observation_buffer_length" : 1,
-    "layers" : [32],
-    "layer_functions" : ["tanh"],
+    "layers" : [256, 256],
+    "layer_functions" : ["relu", "relu"],
     "layer_extras" : [null,null],
-    "output_function" : "identity",
+    "output_function" : "linear",
     "output_extras" : null,
     "normalize_observations" : false
   },
@@ -41,7 +41,7 @@
   "policy_optimizer":
   {
     "type" : "dqn",
-    "gamma" : 0.99,
+    "gamma" : 0.999,
     "noise_std" : 0.05,
     "obs_stats_update_prob" : 0.01,
     "reward_jiggle" : [-1e-4, 1e-4],

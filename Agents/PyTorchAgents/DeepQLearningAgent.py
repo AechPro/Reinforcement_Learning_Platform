@@ -21,7 +21,7 @@ class DeepQLearningAgent(Agent):
         else:
             best_action = 0
             best_score = -np.inf
-            for action in range(num_actions):
+            for action in range(2):
                 if type(state) == list:
                     input_state = np.concatenate( (state[0], (action,)) )
                     input_state = input_state.reshape((1, len(state[0]) + 1))
@@ -36,7 +36,6 @@ class DeepQLearningAgent(Agent):
                     best_action = action
                     best_score = action_quality
 
-        self.iteration += 1
         return best_action
 
     def cleanup(self):

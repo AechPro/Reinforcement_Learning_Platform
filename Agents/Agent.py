@@ -35,7 +35,6 @@ class Agent(object):
 
     def run_benchmark_episode(self, policy, env, obs_stats = None, render = False, render_frame_delay = None):
         initial_obs = env.reset()
-
         benchmark_reward = 0
 
         buffer_shape = [self.cfg["policy"]["observation_buffer_length"]]
@@ -43,16 +42,14 @@ class Agent(object):
             buffer_shape.append(entry)
 
         obs_buffer = [initial_obs.copy() for _ in range(buffer_shape[0])]
-        policy_input = policy_input = np.reshape(obs_buffer, buffer_shape)
-
         while not env.needs_reset:
+            policy_input = self.prepare_policy_input(obs_buffer, buffer_shape)
             action = self.get_action(policy, policy_input, obs_stats=obs_stats)
+
             obs, reward = env.step(action)
+            benchmark_reward += reward
 
             _attach_obs_to_buffer(obs, obs_buffer, buffer_shape[0])
-            policy_input = np.reshape(obs_buffer, buffer_shape)
-
-            benchmark_reward += reward
 
             if render:
                 env.render()

@@ -60,12 +60,12 @@ class ExperienceReplay(object):
             future_rewards = []
 
             for entry in batch:
-                dones.append(entry[DONE_IDX])
-                actions.append(entry[ACTION_IDX])
-                rewards.append(entry[REWARD_IDX])
-                observations.append(entry[OBSERVATION_IDX])
-                next_observations.append(entry[NEXT_OBSERVATION_IDX])
-                future_rewards.append(entry[FUTURE_REWARD_IDX])
+                dones.append(entry[ExperienceReplay.DONE_IDX])
+                actions.append(entry[ExperienceReplay.ACTION_IDX])
+                rewards.append(entry[ExperienceReplay.REWARD_IDX])
+                observations.append(entry[ExperienceReplay.OBSERVATION_IDX])
+                next_observations.append(entry[ExperienceReplay.NEXT_OBSERVATION_IDX])
+                future_rewards.append(entry[ExperienceReplay.FUTURE_REWARD_IDX])
 
             batch = (dones, actions, rewards, observations, future_rewards, next_observations)
 
