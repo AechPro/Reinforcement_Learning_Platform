@@ -12,7 +12,10 @@ class RandomPolicy(Policy, ABC):
         pass
 
     def activate(self, target_input, input_normalization=None):
-        num = target_input.shape[0]
+        if len(target_input.shape) == 0:
+            num = 1
+        else:
+            num = target_input.shape[0]
 
         shape = [num]
         for arg in self.input_shape:

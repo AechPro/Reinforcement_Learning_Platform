@@ -23,12 +23,18 @@ class Optimizer(object):
 
         policy = PolicyFactory.get_from_config(self.cfg)
         action_parser = PolicyActionParsers.linear_parse
-        self.quality_network = policy(self.env.observation_shape, 1, action_parser, self.cfg)
+
+        policy_input_shape = []
+        for arg in self.env.observation_shape:
+            policy_input_shape.append(arg)
+        policy_input_shape[-1] += 1
+
+        self.quality_network = policy(policy_input_shape, 1, action_parser, self.cfg)
         self.quality_network.build_model(self.cfg["policy"])
 
         policy = PolicyFactory.get_from_config(self.cfg)
         action_parser = PolicyActionParsers.linear_parse
-        self.target_quality_network = policy(self.env.observation_shape, 1, action_parser, self.cfg)
+        self.target_quality_network = policy(policy_input_shape, 1, action_parser, self.cfg)
         self.target_quality_network.build_model(self.cfg["policy"])
 
         self.optimizer = torch.optim.Adadelta(self.quality_network.model.parameters(), lr=1e-2)

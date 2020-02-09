@@ -91,9 +91,10 @@ class Policy(object):
 
         size = np.prod(input_shape)
         target_size = np.prod(np.shape(target_input))
-        batch_size = target_size//size
+        batch_size = int(target_size//size)
         shape = [batch_size]
         for entry in input_shape:
             shape.append(entry)
+        print(shape, target_input, self.input_shape)
 
         return np.reshape(target_input, shape)

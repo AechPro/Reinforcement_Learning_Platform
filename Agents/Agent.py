@@ -19,7 +19,7 @@ class Agent(object):
 
         while not env.needs_reset:
             current_obs = obs.copy()
-            policy_input = np.reshape(obs_buffer, buffer_shape)
+            policy_input = self.prepare_policy_input(obs_buffer, buffer_shape)
             action = self.get_action(policy, policy_input, obs_stats=obs_stats)
             obs, reward = env.step(action)
 
@@ -64,6 +64,9 @@ class Agent(object):
         env.close()
         del obs_buffer
         return benchmark_reward
+
+    def prepare_policy_input(self, obs_buffer, buffer_shape):
+        raise NotImplementedError
 
     def get_action(self, policy, state, obs_stats=None):
         raise NotImplementedError
