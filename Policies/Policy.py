@@ -47,6 +47,9 @@ class Policy(object):
     def set_bn_stats(self, stats_list):
         raise NotImplementedError
 
+    def copy_from(self, other):
+        raise NotImplementedError
+
     def save(self, file_path):
         save_path = file_path[:file_path.rfind("/")]
         if not os.path.exists(save_path):

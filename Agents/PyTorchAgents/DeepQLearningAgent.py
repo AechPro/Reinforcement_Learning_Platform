@@ -1,9 +1,7 @@
 from Agents import Agent
-import torch
-from torch.distributions import Categorical
 import numpy as np
 
-class BasicPolicyGradientsAgent(Agent):
+class DeepQLearningAgent(Agent):
     def __init__(self, config):
         super().__init__(config)
         self.eps_end = 0.05
@@ -35,4 +33,4 @@ class BasicPolicyGradientsAgent(Agent):
         return best_action
 
     def cleanup(self):
-        pass
+        self.iteration = 0

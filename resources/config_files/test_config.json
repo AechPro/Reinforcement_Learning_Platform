@@ -26,7 +26,7 @@
 
   "agent":
   {
-    "type" : "torch pg"
+    "type" : "torch dqn"
   },
 
   "gradient_optimizer":
@@ -40,7 +40,8 @@
 
   "policy_optimizer":
   {
-    "type" : "pg",
+    "type" : "dqn",
+    "gamma" : 0.99
     "noise_std" : 0.05,
     "obs_stats_update_prob" : 0.01,
     "reward_jiggle" : [-1e-4, 1e-4],
@@ -51,22 +52,9 @@
     "reward_normalization_function" : "centered ranks"
   },
 
-  "delayed_returns" :
+  "experience_replay":
   {
-    "max_policy_history_length" : 10,
-    "current_returns_ratio_for_theta_reward" : 0.2,
-    "minimum_allowed_returns_ratio" : 0.0
-  },
-
-  "novelty":
-  {
-    "num_strategy_frames" : 200,
-    "strategy_history_size" : 200,
-    "adaptive_omega_default" : 0.0,
-    "adaptive_omega_max" : 1.0,
-    "adaptive_omega_min" : 0.0,
-    "adaptive_omega_mean_threshold" : 1.01,
-    "reward_history_size" : 10,
-    "phi" : 0.8
+    "size": 100000,
+    "initial_frames": 10000
   }
 }

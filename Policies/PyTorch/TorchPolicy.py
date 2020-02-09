@@ -19,7 +19,7 @@ class TorchPolicy(Policy):
             model_input = np.subtract(target_input, mean) / std
 
         reshaped_input = self.reshape_input(model_input)
-        model_input = torch.Tensor(reshaped_input)
+        model_input = torch.as_tensor(reshaped_input)
         output = self.model.forward(model_input)
         preds = np.asarray(output.data)
 
@@ -90,8 +90,8 @@ class TorchPolicy(Policy):
             new_weight = slice[:weight_size]
             new_bias = slice[weight_size:]
 
-            layer.weight.data = torch.Tensor(np.reshape(new_weight, layer.weight.size()))
-            layer.bias.data = torch.Tensor(np.reshape(new_bias, layer.bias.size()))
+            layer.weight.data = torch.as_tensor(np.reshape(new_weight, layer.weight.size()))
+            layer.bias.data = torch.as_tensor(np.reshape(new_bias, layer.bias.size()))
 
             del new_weight
             del new_bias
@@ -129,23 +129,21 @@ class TorchPolicy(Policy):
         for layer in self.model:
             if hasattr(layer, "track_running_stats"):
                 mean, var, num = stats_list[idx]
-                layer.running_mean.data[:] = torch.Tensor(mean)
-                layer.running_var.data[:] = torch.Tensor(var)
+                layer.running_mean.data[:] = torch.as_tensor(mean)
+                layer.running_var.data[:] = torch.as_tensor(var)
                 layer.num_batches_tracked -= layer.num_batches_tracked
                 layer.num_batches_tracked += num
                 idx += 1
         self.update_internal_bn_stats()
-
-    def reset_bn_stats(self):
-        idx = 0
-        for layer in self.model:
-            if hasattr(layer, "track_running_stats"):
-                layer.running_mean.data[:] = torch.zeros_like(layer.running_mean)
-                layer.running_var.data[:] = torch.ones_like(layer.running_var)
-                layer.num_batches_tracked -= layer.num_batches_tracked
-                idx += 1
-        self.update_internal_bn_stats()
-
+        
+    def copy_from(self, other):
+        flat = other.get_trainable_flat()
+        bn = other.get_bn_stats()
+        
+        if len(bn) > 0:
+            self.set_bn_stats(bn)
+        self.set_trainable_flat(flat)
+    
     def save(self, file_path):
         if self.flat is None:
             self.update_internal_flat()
