@@ -105,9 +105,9 @@ class Optimizer(object):
 
         self.optimizer.zero_grad()
         loss = f.smooth_l1_loss(q_network_output, y)
-        print(loss.item())
         loss.backward()
         self.optimizer.step()
+        return loss.item()
 
     def is_done(self):
         return False
