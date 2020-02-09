@@ -9,9 +9,8 @@ class DeepQLearningAgent(Agent):
         self.iteration = 0
         self.eps_decay = 50
 
-
     def get_action(self, policy, state, obs_stats=None):
-        num_actions = np.prod(policy.output_shape)
+        num_actions = int(np.prod(policy.output_shape))
         epsilon = self.eps_end + (self.eps_start - self.eps_end) * np.exp(-1. * self.iteration / self.eps_decay)
 
         if self.cfg["rng"].uniform(0, 1) < epsilon:
@@ -19,10 +18,9 @@ class DeepQLearningAgent(Agent):
         else:
             best_action = 0
             best_score = -np.inf
-            for action in num_actions:
-                input_state = np.concatenate((state, (action,)))
-                input_batch = np.reshape(input_state, (1, len(input_state)))
-                policy_output = policy.get_action(input_batch)
+            for action in range(num_actions):
+                input_state = np.concatenate((state[0,:], (action,)), axis=0)
+                policy_output = policy.get_action(input_state)
                 action_quality = policy_output.max().item()
 
                 if action_quality > best_score:

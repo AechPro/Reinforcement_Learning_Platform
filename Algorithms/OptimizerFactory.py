@@ -6,3 +6,7 @@ def get_from_config(cfg):
                    "basic policy gradients", "basic_policy_gradients", "basic_policy_gradient"):
         from Algorithms.BasicPolicyGradients import Optimizer
         return Optimizer(cfg)
+
+    if t in ("dqn", "deep_q_learning", "deep q learning"):
+        from Algorithms.DeepQLearning import Optimizer
+        return Optimizer(cfg)

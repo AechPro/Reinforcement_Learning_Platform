@@ -8,3 +8,7 @@ def get_from_config(cfg):
                    "basic policy gradients", "basic_policy_gradients", "basic_policy_gradient"):
             from Agents.PyTorchAgents import BasicPolicyGradientsAgent
             return BasicPolicyGradientsAgent(cfg)
+
+        if a_t in ("dqn", "deep q learning", "deep_q_learning"):
+            from Agents.PyTorchAgents import DeepQLearningAgent
+            return DeepQLearningAgent(cfg)

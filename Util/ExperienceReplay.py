@@ -12,7 +12,7 @@ class ExperienceReplay(object):
 
     def init(self, env, agent):
         from Policies import RandomPolicy
-        policy = RandomPolicy(None, env.action_shape, None, cfg)
+        policy = RandomPolicy(env.observation_shape, env.action_shape, None, self.cfg)
 
         while len(self.memory) < self.cfg["experience_replay"]["initial_frames"]:
             episode_data = agent.run_training_episode(policy, env)
@@ -20,7 +20,7 @@ class ExperienceReplay(object):
 
 
     def register_episode(self, episode_data):
-        episode_data.compute_future_rewards()
+        episode_data.compute_future_rewards(self.cfg["policy_optimizer"]["gamma"])
         for i in range(len(episode_data.rewards)):
             timestep = (
                 episode_data.dones[i],

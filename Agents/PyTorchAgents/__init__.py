@@ -1,1 +1,2 @@
 from .BasicPolicyGradientsAgent import BasicPolicyGradientsAgent
+from .DeepQLearningAgent import DeepQLearningAgent

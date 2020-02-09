@@ -1,2 +1,2 @@
 from .Policy import Policy
-from .RandomPolicy import RandomPolicy
+from Policies.PyTorch.RandomPolicy import RandomPolicy

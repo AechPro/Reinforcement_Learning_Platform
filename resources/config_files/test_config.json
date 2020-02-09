@@ -41,7 +41,7 @@
   "policy_optimizer":
   {
     "type" : "dqn",
-    "gamma" : 0.99
+    "gamma" : 0.99,
     "noise_std" : 0.05,
     "obs_stats_update_prob" : 0.01,
     "reward_jiggle" : [-1e-4, 1e-4],
