@@ -4,7 +4,7 @@ import numpy as np
 
 
 class Policy(object):
-    def __init__(self, input_shape, output_shape, action_parser, cfg):
+    def __init__(self, input_shape, output_shape, action_parser, cfg, cfg_key):
         self.model = None
         self.flat = None
         self.input_shape = input_shape
@@ -12,6 +12,7 @@ class Policy(object):
         self.num_params = 0
         self.action_parser = action_parser
         self.cfg = cfg
+        self.cfg_key = cfg_key
         self.bn_stats = None
 
     def build_model(self, model_instructions):
@@ -63,7 +64,7 @@ class Policy(object):
     def get_action(self, observation, input_normalization=None):
         policy_output = self.activate(observation, input_normalization=input_normalization)[0]
 
-        if self.cfg["policy"]["action_noise_std"] != 0:
+        if self.cfg[self.cfg_key]["action_noise_std"] != 0:
             action_perturbation = self.cfg["rng"].randn(len(policy_output))*self.cfg["policy_optimizer"]["action_noise_std"]
             policy_output = np.add(policy_output,action_perturbation)
 

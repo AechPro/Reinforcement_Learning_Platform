@@ -11,7 +11,7 @@ class Agent(object):
         obs = env.reset()
         episode_data = EpisodeData()
 
-        buffer_shape = [self.cfg["policy"]["observation_buffer_length"]]
+        buffer_shape = [self.cfg[policy.cfg_key]["observation_buffer_length"]]
         for entry in policy.input_shape:
             buffer_shape.append(entry)
 
@@ -37,7 +37,7 @@ class Agent(object):
         initial_obs = env.reset()
         benchmark_reward = 0
 
-        buffer_shape = [self.cfg["policy"]["observation_buffer_length"]]
+        buffer_shape = [self.cfg[policy.cfg_key]["observation_buffer_length"]]
         for entry in policy.input_shape:
             buffer_shape.append(entry)
 

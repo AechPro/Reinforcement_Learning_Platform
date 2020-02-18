@@ -9,7 +9,7 @@
     "port" : 1025
   },
 
-  "policy":
+  "value_estimator":
   {
     "type" : ["torch", "ffnn"],
     "init_std" : 0.05,
@@ -24,9 +24,24 @@
     "normalize_observations" : false
   },
 
+  "policy":
+  {
+    "type" : ["torch", "ffnn"],
+    "init_std" : 0.05,
+    "action_noise_std" : 0.00,
+    "action_parser" : "sampling",
+    "observation_buffer_length" : 1,
+    "layers" : [64,64],
+    "layer_functions" : ["tanh", "tanh"],
+    "layer_extras" : [null,null],
+    "output_function" : "softmax",
+    "output_extras" : null,
+    "normalize_observations" : false
+  },
+
   "agent":
   {
-    "type" : "torch dqn"
+    "type" : "torch pg"
   },
 
   "gradient_optimizer":
@@ -40,8 +55,8 @@
 
   "policy_optimizer":
   {
-    "type" : "dqn",
-    "gamma" : 0.999,
+    "type" : "vpg",
+    "gamma" : 0.9925,
     "noise_std" : 0.05,
     "obs_stats_update_prob" : 0.01,
     "reward_jiggle" : [-1e-4, 1e-4],
@@ -55,6 +70,6 @@
   "experience_replay":
   {
     "size": 100000,
-    "initial_frames": 10000
+    "initial_frames": 0
   }
 }

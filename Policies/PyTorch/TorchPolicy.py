@@ -5,8 +5,8 @@ from Policies import Policy
 import os
 
 class TorchPolicy(Policy):
-    def __init__(self, input_shape, output_shape, action_parser, cfg):
-        super().__init__(input_shape, output_shape, action_parser, cfg)
+    def __init__(self, input_shape, output_shape, action_parser, cfg, cfg_key):
+        super().__init__(input_shape, output_shape, action_parser, cfg, cfg_key)
 
     def build_model(self, model_instructions):
         raise NotImplementedError

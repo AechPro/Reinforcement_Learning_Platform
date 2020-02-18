@@ -44,6 +44,28 @@ class ExperienceReplay(object):
             return self.memory[idx]
         return None
 
+    def get_batch(self, batch_size, as_columns=False):
+        batch = [self.get(i) for i in range(batch_size)]
+
+        if as_columns:
+            dones = []
+            actions = []
+            rewards = []
+            observations = []
+            next_observations = []
+            future_rewards = []
+
+            for entry in batch:
+                dones.append(entry[ExperienceReplay.DONE_IDX])
+                actions.append(entry[ExperienceReplay.ACTION_IDX])
+                rewards.append(entry[ExperienceReplay.REWARD_IDX])
+                observations.append(entry[ExperienceReplay.OBSERVATION_IDX])
+                next_observations.append(entry[ExperienceReplay.NEXT_OBSERVATION_IDX])
+                future_rewards.append(entry[ExperienceReplay.FUTURE_REWARD_IDX])
+
+            batch = (dones, actions, rewards, observations, future_rewards, next_observations)
+            return batch
+
     def get_random(self):
         idx = self.cfg["rng"].randint(0, len(self.memory)-1)
         return self.get(idx)
@@ -71,6 +93,9 @@ class ExperienceReplay(object):
 
         return batch
 
-    def cleanup(self):
+    def clear(self):
         del self.memory
         self.memory = []
+
+    def cleanup(self):
+        self.clear()

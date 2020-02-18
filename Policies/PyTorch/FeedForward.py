@@ -6,8 +6,8 @@ from Util import TorchJSONParser
 
 
 class FeedForward(TorchPolicy):
-    def __init__(self, input_shape, output_shape, action_parser, cfg):
-        super().__init__(input_shape, output_shape, action_parser, cfg)
+    def __init__(self, input_shape, output_shape, action_parser, cfg, cfg_key):
+        super().__init__(input_shape, output_shape, action_parser, cfg, cfg_key)
 
     def build_model(self, model_instructions):
         layers = []

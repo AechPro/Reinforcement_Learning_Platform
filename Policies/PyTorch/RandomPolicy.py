@@ -4,8 +4,8 @@ from Policies import Policy, PolicyActionParsers
 import torch
 
 class RandomPolicy(Policy, ABC):
-    def __init__(self, input_shape, output_shape, action_parser, cfg):
-        super().__init__(input_shape, output_shape, action_parser, cfg)
+    def __init__(self, input_shape, output_shape, action_parser, cfg, cfg_key="policy"):
+        super().__init__(input_shape, output_shape, action_parser, cfg, cfg_key)
         self.action_parser = PolicyActionParsers.linear_parse
 
     def build_model(self, model_instructions):

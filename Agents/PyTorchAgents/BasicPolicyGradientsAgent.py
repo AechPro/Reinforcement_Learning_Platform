@@ -12,7 +12,7 @@ class BasicPolicyGradientsAgent(Agent):
     def get_action(self, policy, state, obs_stats=None):
         obs = torch.as_tensor(state, dtype=torch.float32)
         policy_output = policy.model(obs)
-        categorical_output = Categorical(logits=policy_output)
+        categorical_output = Categorical(probs=policy_output)
         action = categorical_output.sample().item()
         return action
 

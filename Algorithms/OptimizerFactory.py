@@ -10,3 +10,8 @@ def get_from_config(cfg):
     if t in ("dqn", "deep_q_learning", "deep q learning"):
         from Algorithms.DeepQLearning import Optimizer
         return Optimizer(cfg)
+
+    if t in ("vpg", "vanilla_policy_gradients", "vanilla policy gradients",
+             "vanilla_policy_gradient", "vanilla policy gradient"):
+        from Algorithms.VanillaPolicyGradients import Optimizer
+        return Optimizer(cfg)
