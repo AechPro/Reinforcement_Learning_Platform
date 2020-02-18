@@ -8,6 +8,9 @@ class EpisodeData(object):
         self.rewards = []
         self.dones = []
         self.future_rewards = []
+        self.td_residuals = []
+        self.advantages = []
+
 
     def register_data(self, environment_step_data):
         policy_input, action, next_policy_input, reward, done = environment_step_data
@@ -29,6 +32,32 @@ class EpisodeData(object):
             for j in range(i, len(self.rewards)):
                 reward += self.rewards[i]*np.power(gamma, j)
             self.future_rewards.append(reward)
+    
+    def compute_td_residuals(self, value_estimations, gamma):
+        residuals = []
+
+        if len(self.future_rewards) == len(self.rewards):
+            rewards = self.future_rewards
+        else:
+            rewards = self.rewards
+
+        for i in range(len(rewards)-1):
+            res = rewards[i] + gamma*value_estimations[i+1] - value_estimations[i]
+            residuals.append(res)
+        residuals.append(rewards[-1])
+
+        self.td_residuals = residuals
+
+    def compute_general_advantage_estimation(self, gamma, lmbda):
+        residuals = self.td_residuals
+        advantages = []
+        for i in range(len(residuals)):
+            adv = 0
+            for j in range(0, len(residuals)-i):
+                coeff = np.power(lmbda*gamma, j)
+                adv += coeff * residuals[i+j]
+            advantages.append(adv)
+        self.advantages = advantages
 
     def cleanup(self):
         del self.actions
@@ -37,5 +66,7 @@ class EpisodeData(object):
         del self.rewards
         del self.dones
         del self.future_rewards
+        del self.td_residuals
+        del self.advantages
 
         self.__init__()
