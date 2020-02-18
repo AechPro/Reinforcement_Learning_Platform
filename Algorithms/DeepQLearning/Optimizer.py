@@ -41,7 +41,7 @@ class Optimizer(object):
         self.optimizer = torch.optim.RMSprop(self.quality_network.model.parameters())
 
         self.experience_replay = ExperienceReplay(self.cfg)
-        self.experience_replay.init(self.env, self.agent)
+        self.experience_replay.fill_initial(self.env, self.agent)
 
     def reconfigure(self):
         self.cleanup()

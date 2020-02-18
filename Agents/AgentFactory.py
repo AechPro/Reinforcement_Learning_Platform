@@ -12,3 +12,8 @@ def get_from_config(cfg):
         if a_t in ("dqn", "deep q learning", "deep_q_learning"):
             from Agents.PyTorchAgents import DeepQLearningAgent
             return DeepQLearningAgent(cfg)
+
+        if a_t in ("vpg", "vanilla_policy_gradients", "vanilla policy gradients",
+                 "vanilla_policy_gradient", "vanilla policy gradient"):
+            from Agents.PyTorchAgents import VanillaPolicyGradientsAgent
+            return VanillaPolicyGradientsAgent(cfg)

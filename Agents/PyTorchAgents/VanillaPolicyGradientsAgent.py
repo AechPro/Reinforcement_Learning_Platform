@@ -2,7 +2,7 @@ from Agents import Agent
 import torch
 from torch.distributions import Categorical
 import numpy as np
-class BasicPolicyGradientsAgent(Agent):
+class VanillaPolicyGradientsAgent(Agent):
     def __init__(self, config):
         super().__init__(config)
 
@@ -13,8 +13,9 @@ class BasicPolicyGradientsAgent(Agent):
         obs = torch.as_tensor(state, dtype=torch.float32)
         policy_output = policy.model(obs)
         categorical_output = Categorical(probs=policy_output)
-        action = categorical_output.sample().item()
-        return action
+        action = categorical_output.sample()
+
+        return action.item()
 
     def cleanup(self):
         pass

@@ -41,7 +41,7 @@
 
   "agent":
   {
-    "type" : "torch pg"
+    "type" : "torch vpg"
   },
 
   "gradient_optimizer":

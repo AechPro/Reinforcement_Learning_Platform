@@ -20,12 +20,12 @@ class Agent(object):
         while not env.needs_reset:
             current_obs = obs.copy()
             policy_input = self.prepare_policy_input(obs_buffer, buffer_shape)
-            action = self.get_action(policy, policy_input, obs_stats=obs_stats)
+            action = self.get_action(policy, policy_input, episode_data, obs_stats=obs_stats)
             obs, reward = env.step(action)
 
             _attach_obs_to_buffer(obs, obs_buffer, buffer_shape[0])
 
-            episode_data.register_data((current_obs, action, obs.copy(), reward, env.needs_reset))
+            episode_data.register_environment_step((current_obs, action, obs.copy(), reward, env.needs_reset))
 
             episode_data.timesteps+=1
 
@@ -44,7 +44,7 @@ class Agent(object):
         obs_buffer = [initial_obs.copy() for _ in range(buffer_shape[0])]
         while not env.needs_reset:
             policy_input = self.prepare_policy_input(obs_buffer, buffer_shape)
-            action = self.get_action(policy, policy_input, obs_stats=obs_stats)
+            action = self.get_action(policy, policy_input, None, obs_stats=obs_stats)
 
             obs, reward = env.step(action)
             benchmark_reward += reward
@@ -65,7 +65,7 @@ class Agent(object):
     def prepare_policy_input(self, obs_buffer, buffer_shape):
         raise NotImplementedError
 
-    def get_action(self, policy, state, obs_stats=None):
+    def get_action(self, policy, state, episode_data, obs_stats=None):
         raise NotImplementedError
 
     def cleanup(self):

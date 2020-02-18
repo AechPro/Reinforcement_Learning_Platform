@@ -12,7 +12,7 @@ class DeepQLearningAgent(Agent):
     def prepare_policy_input(self, obs_buffer, buffer_shape):
         return obs_buffer
 
-    def get_action(self, policy, state, obs_stats=None):
+    def get_action(self, policy, state, episode_data, obs_stats=None):
         num_actions = int(np.prod(policy.output_shape))
         epsilon = self.eps_end + (self.eps_start - self.eps_end) * np.exp(-1. * self.iteration / self.eps_decay)
 

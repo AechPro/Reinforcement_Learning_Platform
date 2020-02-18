@@ -49,39 +49,27 @@ class Optimizer(object):
         self.configure()
 
     def step(self):
+        for i in range(self.batch_size):
+            episode_data = self.agent.run_training_episode(self.policy, self.env)
+            episode_data.compute_future_rewards(self.gamma)
 
-        with torch.no_grad():
-            rewards = []
-            observations = []
-            actions = []
-            values = []
-            advantages = []
+            values = self.value_network.model(torch.as_tensor(episode_data.observations, dtype=torch.float32))
+            episode_data.compute_td_residuals(values, self.gamma)
+            episode_data.compute_general_advantage_estimation(self.gamma, self.lmbda)
 
-            for i in range(self.batch_size):
-                episode_data = self.agent.run_training_episode(self.policy, self.env)
-                episode_data.compute_future_rewards(self.gamma)
+            self.experience_replay.register_episode(episode_data, compute_future_returns=False)
 
-                actions += episode_data.actions
-                rewards += episode_data.future_rewards
-                observations += episode_data.observations
-                values += self.value_network.model(torch.as_tensor(observations, dtype=torch.float32))
+        for i in range(100):
+            self.update_policy()
 
-                episode_data.compute_td_residuals(values, self.gamma)
-                episode_data.compute_general_advantage_estimation(self.gamma, self.lmbda)
-                advantages += episode_data.advantages
-
-            obs = torch.as_tensor(observations, dtype=torch.float32)
-            acts = torch.as_tensor(actions, dtype=torch.int32)
-
-            rewards = torch.as_tensor(rewards, dtype=torch.float32)
-            advantages = torch.as_tensor(advantages, dtype=torch.float32)
-
-        self.update_policy(obs,acts,advantages)
-        loss1 = self.update_value_estimator(obs, rewards)
-        for i in range(200):
-            loss = self.update_value_estimator(obs,rewards)
-        loss2 = self.update_value_estimator(obs, rewards)
-        print("loss difference:",loss1-loss2)
+        while True:
+            loss1 = self.update_value_estimator()
+            for i in range(50):
+                loss = self.update_value_estimator()
+            loss2 = self.update_value_estimator()
+            print("loss difference:",loss1-loss2)
+            if loss1-loss2>0:
+                break
 
         policy_reward = 0
         for i in range(10):
@@ -91,17 +79,27 @@ class Optimizer(object):
         print(self.epoch, "|", policy_reward)
         self.epoch += 1
 
-    def update_policy(self, observations, acts, advantages):
+    def update_policy(self):
+        batch = self.experience_replay.get_random_batch(128, as_columns=True)
 
-        print("update policy")
+        observations = torch.as_tensor(batch[ExperienceReplay.OBSERVATION_IDX], dtype=torch.float32)
+        advantages = torch.as_tensor(batch[ExperienceReplay.ADVANTAGE_IDX], dtype=torch.float32)
+        actions = torch.as_tensor(batch[ExperienceReplay.ACTION_IDX], dtype=torch.int32)
+
         self.policy_optimizer.zero_grad()
-        output = self.policy.model(observations)
-        log_probs = Categorical(probs=output).log_prob(acts)
+
+        policy_output = Categorical(probs=self.policy.model(observations))
+        log_probs = policy_output.log_prob(actions)
         loss = -(log_probs * advantages).mean()
+
         loss.backward()
         self.policy_optimizer.step()
 
-    def update_value_estimator(self, observations, rewards):
+    def update_value_estimator(self):
+        batch = self.experience_replay.get_random_batch(128, as_columns=True)
+        observations = torch.as_tensor(batch[ExperienceReplay.OBSERVATION_IDX], dtype=torch.float32)
+        rewards = torch.as_tensor(batch[ExperienceReplay.FUTURE_REWARD_IDX], dtype=torch.float32)
+
         value_estimations = self.value_network.model(observations).view(rewards.shape)
 
         self.value_optimizer.zero_grad()
