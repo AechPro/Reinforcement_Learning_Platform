@@ -1,7 +1,7 @@
 {
   "seed" : 10101010,
   "noise_table_size" : 50000000,
-  "env_id" : "CartPole-v1",
+  "env_id" : "LunarLander-v2",
 
   "server":
   {
@@ -32,7 +32,7 @@
     "action_parser" : "sampling",
     "observation_buffer_length" : 1,
     "layers" : [64,64],
-    "layer_functions" : ["tanh", "tanh"],
+    "layer_functions" : ["relu", "relu"],
     "layer_extras" : [null,null],
     "output_function" : "softmax",
     "output_extras" : null,
@@ -69,7 +69,7 @@
 
   "experience_replay":
   {
-    "size": 100000,
+    "size": 5000,
     "initial_frames": 0
   }
 }

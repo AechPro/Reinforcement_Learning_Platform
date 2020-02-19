@@ -7,7 +7,6 @@ import torch
 from torch.distributions import Categorical
 from torch.nn import functional as f
 
-
 class Optimizer(object):
     def __init__(self, config):
         self.cfg = config
@@ -19,7 +18,7 @@ class Optimizer(object):
         self.policy_optimizer = None
         self.experience_replay = None
 
-        self.batch_size = 1
+        self.batch_size = 64
         self.gamma = self.cfg["policy_optimizer"]["gamma"]
         self.lmbda = 0.97
         self.epoch = 0
@@ -49,22 +48,23 @@ class Optimizer(object):
         self.configure()
 
     def step(self):
-        for i in range(self.batch_size):
-            episode_data = self.agent.run_training_episode(self.policy, self.env)
-            episode_data.compute_future_rewards(self.gamma)
+        with torch.no_grad():
+            for i in range(self.batch_size):
+                episode_data = self.agent.run_training_episode(self.policy, self.env)
+                episode_data.compute_future_rewards(self.gamma)
 
-            values = self.value_network.model(torch.as_tensor(episode_data.observations, dtype=torch.float32))
-            episode_data.compute_td_residuals(values, self.gamma)
-            episode_data.compute_general_advantage_estimation(self.gamma, self.lmbda)
+                values = self.value_network.model(torch.as_tensor(episode_data.observations, dtype=torch.float32))
+                episode_data.compute_td_residuals(values, self.gamma)
+                episode_data.compute_general_advantage_estimation(self.gamma, self.lmbda)
 
             self.experience_replay.register_episode(episode_data, compute_future_returns=False)
 
-        for i in range(100):
+        for i in range(2):
             self.update_policy()
 
+        loss1 = self.update_value_estimator()
         while True:
-            loss1 = self.update_value_estimator()
-            for i in range(50):
+            for i in range(200):
                 loss = self.update_value_estimator()
             loss2 = self.update_value_estimator()
             print("loss difference:",loss1-loss2)
