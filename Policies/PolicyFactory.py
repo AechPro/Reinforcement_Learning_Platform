@@ -37,6 +37,11 @@ def _get_model(implementation_type, model_type):
 
 def _get_action_parser(parser_str):
     p = parser_str.strip().lower()
+
     if p in ("sample", "sampling", "choice", "probabilistic", "categorical"):
         return PolicyActionParsers.random_sample
+
+    if p in ("multinomial", "multivariate", "multivariate sample", "multinomial sample"):
+        return PolicyActionParsers.multinomial_distribution
+
     return PolicyActionParsers.linear_parse

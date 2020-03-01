@@ -135,7 +135,7 @@ class TorchPolicy(Policy):
                 layer.num_batches_tracked += num
                 idx += 1
         self.update_internal_bn_stats()
-        
+
     def copy_from(self, other):
         flat = other.get_trainable_flat()
         bn = other.get_bn_stats()

@@ -63,6 +63,12 @@ class ExperienceReplay(object):
             batch = self._batch_to_columns(batch)
 
         return batch
+
+    def get_all(self, as_columns=False):
+        batch = self.memory
+        if as_columns:
+            batch = self._batch_to_columns(batch)
+        return batch
     
     def _batch_to_columns(self, batch):
         actions = []

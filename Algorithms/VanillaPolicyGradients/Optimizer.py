@@ -5,6 +5,7 @@ from Util import ExperienceReplay
 import numpy as np
 import torch
 from torch.distributions import Categorical
+from torch.distributions.normal import Normal
 from torch.nn import functional as f
 
 class Optimizer(object):
@@ -18,7 +19,7 @@ class Optimizer(object):
         self.policy_optimizer = None
         self.experience_replay = None
 
-        self.batch_size = 64
+        self.batch_size = 32
         self.gamma = self.cfg["policy_optimizer"]["gamma"]
         self.lmbda = 0.97
         self.epoch = 0
@@ -35,13 +36,14 @@ class Optimizer(object):
 
         self.value_network = models["value_estimator"](value_input_shape, 1, action_parsers["value_estimator"], self.cfg, "value_estimator")
         self.value_network.build_model(self.cfg["value_estimator"])
-        self.value_optimizer = torch.optim.RMSprop(self.value_network.model.parameters())
+        self.value_optimizer = torch.optim.Adam(self.value_network.model.parameters(), lr=1e-3)
 
         self.policy = models["policy"](policy_input_shape, policy_output_shape, action_parsers["policy"], self.cfg, "policy")
         self.policy.build_model(self.cfg["policy"])
-        self.policy_optimizer = torch.optim.Adam(self.policy.model.parameters(), lr=1e-2)
+        self.policy_optimizer = torch.optim.Adam(self.policy.model.parameters(), lr=0.05)
 
         self.experience_replay = ExperienceReplay(self.cfg)
+
 
     def reconfigure(self):
         self.cleanup()
@@ -59,12 +61,11 @@ class Optimizer(object):
 
             self.experience_replay.register_episode(episode_data, compute_future_returns=False)
 
-        for i in range(2):
-            self.update_policy()
+        self.update_policy()
 
         loss1 = self.update_value_estimator()
         while True:
-            for i in range(200):
+            for i in range(10):
                 loss = self.update_value_estimator()
             loss2 = self.update_value_estimator()
             print("loss difference:",loss1-loss2)
@@ -80,23 +81,25 @@ class Optimizer(object):
         self.epoch += 1
 
     def update_policy(self):
-        batch = self.experience_replay.get_random_batch(128, as_columns=True)
+        batch = self.experience_replay.get_random_batch(500, as_columns=True)
 
         observations = torch.as_tensor(batch[ExperienceReplay.OBSERVATION_IDX], dtype=torch.float32)
         advantages = torch.as_tensor(batch[ExperienceReplay.ADVANTAGE_IDX], dtype=torch.float32)
         actions = torch.as_tensor(batch[ExperienceReplay.ACTION_IDX], dtype=torch.int32)
 
+        advantages = (advantages - advantages.mean())/advantages.std()
+
         self.policy_optimizer.zero_grad()
 
         policy_output = Categorical(probs=self.policy.model(observations))
         log_probs = policy_output.log_prob(actions)
-        loss = -(log_probs * advantages).mean()
-
+        loss = (log_probs * advantages).mean()
+        loss = -loss
         loss.backward()
         self.policy_optimizer.step()
 
     def update_value_estimator(self):
-        batch = self.experience_replay.get_random_batch(128, as_columns=True)
+        batch = self.experience_replay.get_random_batch(500, as_columns=True)
         observations = torch.as_tensor(batch[ExperienceReplay.OBSERVATION_IDX], dtype=torch.float32)
         rewards = torch.as_tensor(batch[ExperienceReplay.FUTURE_REWARD_IDX], dtype=torch.float32)
 

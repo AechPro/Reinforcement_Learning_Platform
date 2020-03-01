@@ -48,14 +48,13 @@ class Policy(object):
     def set_bn_stats(self, stats_list):
         raise NotImplementedError
 
+    def get_output_log_probs(self, output, action):
+        raise NotImplementedError
+
     def copy_from(self, other):
         raise NotImplementedError
 
     def save(self, file_path):
-        save_path = file_path[:file_path.rfind("/")]
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
-
         raise NotImplementedError
 
     def load(self, file_path):
@@ -65,7 +64,7 @@ class Policy(object):
         policy_output = self.activate(observation, input_normalization=input_normalization)[0]
 
         if self.cfg[self.cfg_key]["action_noise_std"] != 0:
-            action_perturbation = self.cfg["rng"].randn(len(policy_output))*self.cfg["policy_optimizer"]["action_noise_std"]
+            action_perturbation = self.cfg["rng"].randn(len(policy_output))*self.cfg["policy"]["action_noise_std"]
             policy_output = np.add(policy_output,action_perturbation)
 
         return self.action_parser(policy_output, self.cfg["rng"])
